@@ -1,7 +1,4 @@
 import tensorflow as tf
-from tensorflow.models.rnn import rnn_cell
-from tensorflow.models.rnn import seq2seq
-
 import numpy as np
 
 class Model():
@@ -12,11 +9,11 @@ class Model():
             config.seq_length = 1
 
         if config.cell == 'rnn':
-            cell_fn = rnn_cell.BasicRNNCell
+            cell_fn = tf.nn.rnn_cell.BasicRNNCell
         elif config.cell == 'gru':
-            cell_fn = rnn_cell.GRUCell
+            cell_fn = tf.nn.rnn_cell.GRUCell
         elif config.cell == 'lstm':
-            cell_fn = rnn_cell.BasicLSTMCell
+            cell_fn = tf.nn.rnn_cell.BasicLSTMCell
         else:
             raise Exception("model type not supported: {}".format(config.cell))
 
@@ -28,7 +25,7 @@ class Model():
 
         # Create internal multi-layer cell for RNN
         cell = cell_fn(config.rnn_size)
-        self.cell = cell = rnn_cell.MultiRNNCell([cell] * config.num_layers)
+        self.cell = cell = tf.nn.rnn_cell.MultiRNNCell([cell] * config.num_layers)
 
         # Initial state is all zeros
         self.initial_state = cell.zero_state(config.batch_size, tf.float32)
@@ -53,7 +50,7 @@ class Model():
 
         # Loop function defined above will be applied to the output of the
         # decoder and reused as input instead of using decoder_inputs
-        outputs, last_state = seq2seq.rnn_decoder(inputs, self.initial_state, 
+        outputs, last_state = tf.nn.seq2seq.rnn_decoder(inputs, self.initial_state, 
                                 cell, loop_function=loop if infer else None,
                                 scope='rnnlm')
 
@@ -61,7 +58,7 @@ class Model():
 
         self.logits = tf.matmul(output, softmax_w) + softmax_b
         self.probs = tf.nn.softmax(self.logits)
-        loss = seq2seq.sequence_loss_by_example([self.logits],
+        loss = tf.nn.seq2seq.sequence_loss_by_example([self.logits],
                 [tf.reshape(self.targets, [-1])],
                 [tf.ones([config.batch_size * config.seq_length])],
                 config.vocab_size)

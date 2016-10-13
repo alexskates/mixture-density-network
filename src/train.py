@@ -1,20 +1,16 @@
 from __future__ import print_function
 import numpy as np
 import tensorflow as tf
-
 import time
 import os
 
 from utils import TextLoader
 from model import Model
 
-def train(config):
-    data_loader = TextLoader(config.raw_data, config.batch_size,
-                    config.seq_length)
-    config.vocab_size = data_loader.vocab_size
-    
-    model = Model(config)
+#if __name__ = "__main__":
+#    main()
 
+def train(config, data, model):
     losses = []
 
     with tf.Session() as sess:
@@ -47,3 +43,10 @@ def train(config):
                 losses.append(train_loss)
 
     return losses
+
+#def main()
+#    data_loader = TextLoader(config.raw_data, config.batch_size,
+#                    config.seq_length)
+#    config.vocab_size = data_loader.vocab_size
+#    
+#    model = Model(config)
